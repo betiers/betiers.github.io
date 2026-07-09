@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCBE Tiers</title>
+    <link rel="stylesheet" href="gframework.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b1120;
+            color: #e8edf5;
+            font-family: 'Inter', sans-serif;
+            padding: 24px 16px 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 26px;
+            letter-spacing: -0.3px;
+            margin-bottom: 22px;
+            background: linear-gradient(135deg, #b7c9e2, #7aa2f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 28px;
+            max-width: 720px;
+            width: 100%;
+        }
+
+        .modes button {
+            background: #1f2937;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #c9d4e6;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.2px;
+            flex: 0 1 auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modes button:hover {
+            background: #2d3a4f;
+            color: #ffffff;
+        }
+
+        .modes button.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 0 0 2px #1e4f8a, 0 4px 10px rgba(59,130,246,0.3);
+        }
+
+        .modes button img {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        .wrapper {
+            max-width: 720px;
+            width: 100%;
+        }
+
+        .player {
+            background: #182233;
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transition: 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player.top1 {
+            background: linear-gradient(135deg, #1a1a2e, #2a1f0f);
+        }
+
+        .player.top2 {
+            background: linear-gradient(135deg, #1a1a2e, #1a1f2a);
+        }
+
+        .player.top3 {
+            background: linear-gradient(135deg, #1a1a2e, #1f1a12);
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: #253340;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: #a0b9d6;
+            border: none;
+            transition: 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .player.top1 .avatar { 
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.15);
+        }
+        .player.top2 .avatar { 
+            color: #b0c4d9;
+            background: rgba(160, 175, 192, 0.15);
+        }
+        .player.top3 .avatar { 
+            color: #cd7f32;
+            background: rgba(205, 127, 50, 0.15);
+        }
+
+        .info {
+            flex: 1 1 160px;
+            min-width: 120px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nickname {
+            font-weight: 700;
+            font-size: 17px;
+            letter-spacing: -0.2px;
+            color: #f0f4fe;
+            word-break: break-word;
+            transition: 0.3s ease;
+        }
+
+        .player.top1 .nickname { 
+            color: #fbbf24;
+        }
+        .player.top2 .nickname { 
+            color: #d1ddee;
+        }
+        .player.top3 .nickname { 
+            color: #e6b17e;
+        }
+
+        .score {
+            font-size: 14px;
+            color: #9bb0cc;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .player.top1 .score { color: #fbbf24; opacity: 0.8; }
+        .player.top2 .score { color: #b0c4d9; opacity: 0.8; }
+        .player.top3 .score { color: #cd7f32; opacity: 0.8; }
+
+        .rank-badge {
+            background: #25344a;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #d6e2f5;
+            border: 1px solid #364a63;
+            white-space: nowrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .rank-badge.bronze { background: #3a2e24; border-color: #a67c4e; color: #e5c792; }
+        .rank-badge.iron { background: #2d343f; border-color: #7a8b9c; color: #c8d8ea; }
+        .rank-badge.gold { background: #3d3520; border-color: #d4a747; color: #f5d87a; }
+        .rank-badge.diamond { background: #1f334a; border-color: #4f9bd8; color: #9ad0ff; }
+        .rank-badge.master { background: #2f1f3a; border-color: #b17fd6; color: #dfb5ff; }
+
+        .tiers {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 10px;
+            margin-left: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tier-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tier-item .rank-badge {
+            font-size: 12px;
+            padding: 2px 10px;
+        }
+
+        .footer {
+            margin-top: 36px;
+            max-width: 720px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #6a7f9e;
+            border-top: 1px solid #1c2a3d;
+            padding-top: 20px;
+        }
+
+        .footer a {
+            color: #5b8ef0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .empty-placeholder {
+            color: #4c637f;
+            font-style: italic;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        @media (max-width: 550px) {
+            .player {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .tiers {
+                margin-left: 0;
+                justify-content: flex-start;
+                padding-top: 4px;
+                border-top: 1px solid #233044;
+            }
+            .info {
+                flex: 1 1 auto;
+            }
+            .modes button {
+                padding: 6px 14px;
+                font-size: 13px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Лидерборд Minecraft Bedrock</h1>
+
+    <div class="modes">
+        <button class="material-button active" data-mode="OVERALL">
+            <img src="icons/overall.svg" alt="Overall">
+            Overall
+        </button>
+        <button class="material-button" data-mode="UHC">
+            <img src="icons/uhc.svg" alt="UHC">
+            UHC
+        </button>
+        <button class="material-button" data-mode="NETHEROP">
+            <img src="icons/netherop.svg" alt="NetherOP">
+            NetherOP
+        </button>
+        <button class="material-button" data-mode="DIAMOND">
+            <img src="icons/diamond.svg" alt="Diamond">
+            Diamond
+        </button>
+        <button class="material-button" data-mode="CPVP">
+            <img src="icons/cpvp.svg" alt="CPVP">
+            CPVP
+        </button>
+    </div>
+
+    <div class="wrapper" id="content"></div>
+
+    <div class="footer">
+        <p>Проекты, поддерживаемые в рейтинге:</p>
+        <ul>
+            <li><a href="https://t.me/fearevents" target="_blank">FearEvents</a></li>
+        </ul>
+    </div>
+
+    <script>
+        const content = document.getElementById('content');
+        const buttons = document.querySelectorAll('.modes button');
+
+        const MODE_FIELD = {
+            OVERALL: 'eloOverall',
+            UHC: 'eloUHC',
+            NETHEROP: 'eloNetherOP',
+            DIAMOND: 'eloDiamond',
+            CPVP: 'eloCPVP'
+        };
+        const MODE_RANK_FIELD = {
+            OVERALL: 'rankOverall',
+            UHC: 'rankUHC',
+            NETHEROP: 'rankNetherOP',
+            DIAMOND: 'rankDiamond',
+            CPVP: 'rankCPVP'
+        };
+
+        function getRankBadgeClass(rankName) {
+            if (!rankName) return '';
+            const lower = rankName.toLowerCase();
+            if (lower.includes('bronze')) return 'bronze';
+            if (lower.includes('iron')) return 'iron';
+            if (lower.includes('gold')) return 'gold';
+            if (lower.includes('diamond')) return 'diamond';
+            if (lower.includes('master')) return 'master';
+            return '';
+        }
+
+        function cleanRankName(raw) {
+            if (!raw) return '—';
+            return raw.replace(/§[0-9a-fk-or]/gi, '').trim();
+        }
+
+        async function fetchAllPlayers() {
+            try {
+                const response = await fetch('/db/');
+                if (!response.ok) throw new Error('Cannot list directory');
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a');
+                const yamlFiles = [];
+                
+                for (const link of links) {
+                    const href = link.getAttribute('href');
+                    if (href && href.endsWith('.yml')) {
+                        yamlFiles.push(href);
+                    }
+                }
+
+                const allPlayers = [];
+                for (const file of yamlFiles) {
+                    try {
+                        const fileResponse = await fetch(`/db/${file}`);
+                        if (!fileResponse.ok) continue;
+                        const yamlText = await fileResponse.text();
+                        const playerData = parseYamlPlayer(yamlText);
+                        if (playerData) {
+                            allPlayers.push(playerData);
+                        }
+                    } catch (e) {
+                        console.warn(`Failed to load ${file}:`, e);
+                    }
+                }
+
+                return allPlayers;
+            } catch (error) {
+                console.error('Error loading players:', error);
+                return null;
+            }
+        }
+
+        function parseYamlPlayer(yamlText) {
+            const data = {};
+            const lines = yamlText.split('\n');
+            let playerName = null;
+
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+
+                const colonIndex = line.indexOf(':');
+                if (colonIndex !== -1) {
+                    const key = line.substring(0, colonIndex).trim();
+                    let value = line.substring(colonIndex + 1).trim();
+                    
+                    if (key === 'playerName') {
+                        playerName = value;
+                        continue;
+                    }
+
+                    if (value === 'null' || value === '') value = null;
+                    if (!isNaN(value) && value !== '') value = Number(value);
+                    data[key] = value;
+                }
+            }
+
+            if (!playerName) return null;
+            return { name: playerName, data: data };
+        }
+
+        async function renderMode(mode) {
+            const field = MODE_FIELD[mode];
+            const rankField = MODE_RANK_FIELD[mode];
+            if (!field) return;
+
+            const playersData = await fetchAllPlayers();
+            if (!playersData || playersData.length === 0) {
+                content.innerHTML = '<div class="empty-placeholder">Не удалось загрузить данные игроков</div>';
+                return;
+            }
+
+            const players = playersData.map(p => {
+                const elo = p.data[field] ?? 0;
+                const rank = p.data[rankField] ? cleanRankName(p.data[rankField]) : '—';
+                return { name: p.name, elo, rank, exists: true };
+            });
+
+            const sorted = [...players].sort((a, b) => b.elo - a.elo);
+            const top = sorted.slice(0, 8);
+
+            content.innerHTML = '';
+
+            if (top.length === 0) {
+                content.innerHTML = '<div class="empty-placeholder">Нет данных для этого режима</div>';
+                return;
+            }
+
+            top.forEach((p, index) => {
+                const place = index + 1;
+                const div = document.createElement('div');
+                div.className = 'player';
+                if (place === 1) div.classList.add('top1');
+                if (place === 2) div.classList.add('top2');
+                if (place === 3) div.classList.add('top3');
+
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                avatar.textContent = p.name.charAt(0).toUpperCase();
+
+                const info = document.createElement('div');
+                info.className = 'info';
+                const nickSpan = document.createElement('div');
+                nickSpan.className = 'nickname';
+                nickSpan.textContent = p.name;
+
+                const scoreSpan = document.createElement('div');
+                scoreSpan.className = 'score';
+                scoreSpan.textContent = `ELO: ${p.elo}`;
+
+                info.appendChild(nickSpan);
+                info.appendChild(scoreSpan);
+
+                const tiersDiv = document.createElement('div');
+                tiersDiv.className = 'tiers';
+
+                if (p.rank && p.rank !== '—') {
+                    const badge = document.createElement('span');
+                    badge.className = `rank-badge ${getRankBadgeClass(p.rank)}`;
+                    badge.textContent = p.rank;
+                    tiersDiv.appendChild(badge);
+                } else {
+                    const emptyBadge = document.createElement('span');
+                    emptyBadge.className = 'rank-badge';
+                    emptyBadge.textContent = '—';
+                    emptyBadge.style.opacity = '0.4';
+                    tiersDiv.appendChild(emptyBadge);
+                }
+
+                div.appendChild(avatar);
+                div.appendChild(info);
+                div.appendChild(tiersDiv);
+                content.appendChild(div);
+            });
+        }
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const mode = btn.dataset.mode;
+                renderMode(mode);
+            });
+        });
+
+        renderMode('OVERALL');
+    </script>
+    <script src="gframework.js"></script>
+</body>
+</html>
