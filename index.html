@@ -24,15 +24,19 @@
             align-items: center;
         }
 
-        h1 {
-            font-weight: 700;
-            font-size: 26px;
-            letter-spacing: -0.3px;
+        .header-logo {
+            max-width: 720px;
+            width: 100%;
             margin-bottom: 22px;
-            background: linear-gradient(135deg, #b7c9e2, #7aa2f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            display: flex;
+            justify-content: center;
+        }
+
+        .header-logo img {
+            max-width: 100%;
+            height: auto;
+            max-height: 80px;
+            object-fit: contain;
         }
 
         .modes {
@@ -260,6 +264,13 @@
             font-size: 15px;
         }
 
+        .loading {
+            color: #4c637f;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 15px;
+        }
+
         @media (max-width: 550px) {
             .player {
                 flex-direction: column;
@@ -279,14 +290,16 @@
                 padding: 6px 14px;
                 font-size: 13px;
             }
-            h1 {
-                font-size: 22px;
+            .header-logo img {
+                max-height: 50px;
             }
         }
     </style>
 </head>
 <body>
-    <h1>Лидерборд Minecraft Bedrock</h1>
+    <div class="header-logo">
+        <img src="icons/title.png" alt="MCBE Tiers">
+    </div>
 
     <div class="modes">
         <button class="material-button active" data-mode="OVERALL">
@@ -311,7 +324,9 @@
         </button>
     </div>
 
-    <div class="wrapper" id="content"></div>
+    <div class="wrapper" id="content">
+        <div class="loading">Загрузка данных...</div>
+    </div>
 
     <div class="footer">
         <p>Проекты, поддерживаемые в рейтинге:</p>
@@ -357,76 +372,24 @@
 
         async function fetchAllPlayers() {
             try {
-                const response = await fetch('/db/');
-                if (!response.ok) throw new Error('Cannot list directory');
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const links = doc.querySelectorAll('a');
-                const yamlFiles = [];
-                
-                for (const link of links) {
-                    const href = link.getAttribute('href');
-                    if (href && href.endsWith('.yml')) {
-                        yamlFiles.push(href);
-                    }
+                const response = await fetch('/db/players.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                const allPlayers = [];
-                for (const file of yamlFiles) {
-                    try {
-                        const fileResponse = await fetch(`/db/${file}`);
-                        if (!fileResponse.ok) continue;
-                        const yamlText = await fileResponse.text();
-                        const playerData = parseYamlPlayer(yamlText);
-                        if (playerData) {
-                            allPlayers.push(playerData);
-                        }
-                    } catch (e) {
-                        console.warn(`Failed to load ${file}:`, e);
-                    }
-                }
-
-                return allPlayers;
+                const players = await response.json();
+                return players;
             } catch (error) {
                 console.error('Error loading players:', error);
                 return null;
             }
         }
 
-        function parseYamlPlayer(yamlText) {
-            const data = {};
-            const lines = yamlText.split('\n');
-            let playerName = null;
-
-            for (let line of lines) {
-                line = line.trim();
-                if (!line) continue;
-
-                const colonIndex = line.indexOf(':');
-                if (colonIndex !== -1) {
-                    const key = line.substring(0, colonIndex).trim();
-                    let value = line.substring(colonIndex + 1).trim();
-                    
-                    if (key === 'playerName') {
-                        playerName = value;
-                        continue;
-                    }
-
-                    if (value === 'null' || value === '') value = null;
-                    if (!isNaN(value) && value !== '') value = Number(value);
-                    data[key] = value;
-                }
-            }
-
-            if (!playerName) return null;
-            return { name: playerName, data: data };
-        }
-
         async function renderMode(mode) {
             const field = MODE_FIELD[mode];
             const rankField = MODE_RANK_FIELD[mode];
             if (!field) return;
+
+            content.innerHTML = '<div class="loading">Загрузка данных...</div>';
 
             const playersData = await fetchAllPlayers();
             if (!playersData || playersData.length === 0) {
@@ -437,7 +400,7 @@
             const players = playersData.map(p => {
                 const elo = p.data[field] ?? 0;
                 const rank = p.data[rankField] ? cleanRankName(p.data[rankField]) : '—';
-                return { name: p.name, elo, rank, exists: true };
+                return { name: p.name, elo, rank };
             });
 
             const sorted = [...players].sort((a, b) => b.elo - a.elo);
